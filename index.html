@@ -399,34 +399,25 @@
             e.preventDefault(); 
             
             if(!selectedStart || !selectedEnd) {
-                const alertBox = document.getElementById('alertBox');
-                alertBox.innerText = "⚠️ Veuillez sélectionner vos dates sur le calendrier.";
-                alertBox.classList.remove('hidden');
-                document.getElementById('booking').scrollIntoView();
+                alert("⚠️ Sélectionne tes dates sur le calendrier !");
                 return;
             }
 
-            // --- VÉRIFICATION STRICTE DES DOCUMENTS ---
-            const idCard = document.getElementById('fileIdCard').files.length > 0;
-            const license = document.getElementById('fileLicense').files.length > 0;
-            const proof = document.getElementById('fileProof').files.length > 0;
-            let missingDocs = false;
+            // Récupération des infos pour le message
+            const nom = document.getElementById('lastname').value.toUpperCase();
+            const prenom = document.getElementById('firstname').value;
+            const tel = document.getElementById('phone').value;
+            const prix = document.getElementById('displayPrice').innerText;
+            const debut = selectedStart + " à " + document.getElementById('timeStart').value;
+            const fin = selectedEnd + " à " + document.getElementById('timeEnd').value;
 
-            // Reset des bordures rouges
-            ['labelIdCard', 'labelLicense', 'labelProof'].forEach(id => {
-                document.getElementById(id).classList.remove('border-error');
-            });
+            // Construction du message pour ton WhatsApp
+            const text = `*NOUVELLE RÉSERVATION* 🏎️%0A%0A👤 *Client:* ${prenom} ${nom}%0A📅 *Du:* ${debut}%0A📅 *Au:* ${fin}%0A💰 *TOTAL:* ${prix}%0A📞 *Tél:* ${tel}%0A%0A✅ Accepter / ❌ Refuser`;
 
-            // Ajout des bordures rouges si manquant
-            if(!idCard) { document.getElementById('labelIdCard').classList.add('border-error'); missingDocs = true; }
-            if(!license) { document.getElementById('labelLicense').classList.add('border-error'); missingDocs = true; }
-            if(!proof) { document.getElementById('labelProof').classList.add('border-error'); missingDocs = true; }
-            
-            if(missingDocs) {
-                alert("⛔ Documents manquants !\n\nVous ne pouvez pas envoyer la demande sans joindre :\n1. Carte d'identité\n2. Permis de conduire\n3. Justificatif de domicile\n\nLes champs manquants sont indiqués en rouge.");
-                return;
-            }
+            // Ouverture de WhatsApp
+            window.open(`https://wa.me/33614739169?text=${text}`, '_blank');
 
+            // Ton animation de succès originale
             const btn = document.getElementById('submitBtn');
             btn.textContent = "DEMANDE ENVOYÉE !"; 
             btn.style.backgroundColor = "#22c55e"; 
@@ -436,18 +427,6 @@
                 btn.textContent = "CONFIRMER MA DEMANDE"; 
                 btn.style.backgroundColor = "white"; 
                 btn.style.color = "black"; 
-                e.target.reset(); 
-                
-                ['labelIdCard', 'labelLicense', 'labelProof'].forEach(id => {
-                    const l = document.getElementById(id);
-                    l.classList.remove('border-green-500', 'bg-green-500/10', 'border-error');
-                    l.querySelector('i').style.color = '#9ca3af'; 
-                });
-
-                selectedStart=null; selectedEnd=null; 
-                renderCalendar(); 
-                calculatePrice(); 
-                initAutoTime();
             }, 3000);
         }
 
@@ -455,3 +434,4 @@
     </script>
 </body>
 </html>
+
