@@ -395,11 +395,21 @@
             } 
         }
 
-        async function handleBooking(e) {
+       async function handleBooking(e) {
             e.preventDefault(); 
             
             if(!selectedStart || !selectedEnd) {
-                alert("⚠️ Veuillez sélectionner vos dates.");
+                alert("⚠️ Veuillez sélectionner vos dates sur le calendrier.");
+                return;
+            }
+
+            // Vérification des documents
+            const idCard = document.getElementById('fileIdCard').files[0];
+            const license = document.getElementById('fileLicense').files[0];
+            const proof = document.getElementById('fileProof').files[0];
+            
+            if(!idCard || !license || !proof) {
+                alert("⛔ Documents manquants !");
                 return;
             }
 
@@ -407,19 +417,19 @@
             btn.disabled = true;
             btn.textContent = "ENVOI EN COURS...";
 
+            // Préparation des données pour Make
             const formData = new FormData();
             formData.append('prenom', document.getElementById('firstname').value);
             formData.append('nom', document.getElementById('lastname').value);
             formData.append('tel', document.getElementById('phone').value);
-            formData.append('email', document.getElementById('email').value);
             formData.append('prix', document.getElementById('displayPrice').innerText);
             formData.append('debut', selectedStart + " " + (selectedStartTime || "09:00"));
             formData.append('fin', selectedEnd + " " + (selectedEndTime || "09:00"));
             
-            // Les fichiers
-            formData.append('photo_id', document.getElementById('fileIdCard').files[0]);
-            formData.append('photo_permis', document.getElementById('fileLicense').files[0]);
-            formData.append('photo_domicile', document.getElementById('fileProof').files[0]);
+            // Envoi des fichiers
+            formData.append('photo_id', idCard);
+            formData.append('photo_permis', license);
+            formData.append('photo_justif', proof);
 
             try {
                 const response = await fetch('https://hook.eu1.make.com/7xza5kjfbpl6eq78r0ldvja52bwk8816', {
@@ -430,11 +440,13 @@
                 if (response.ok) {
                     btn.style.backgroundColor = "#22c55e";
                     btn.textContent = "DEMANDE ENVOYÉE !";
-                    alert("✅ Demande reçue ! On vous recontacte vite.");
+                    alert("✅ Parfait ! Votre demande a été transmise.");
                     e.target.reset();
+                } else {
+                    throw new Error();
                 }
             } catch (error) {
-                alert("❌ Erreur d'envoi");
+                alert("❌ Erreur lors de l'envoi.");
                 btn.disabled = false;
                 btn.textContent = "CONFIRMER MA DEMANDE";
             }
@@ -443,6 +455,7 @@
     </script>
 </body>
 </html>
+
 
 
 
