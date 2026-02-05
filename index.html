@@ -396,61 +396,15 @@
         }
 
         function handleBooking(e) {
-    e.preventDefault(); 
-    
-    // 1. Vérification des dates (Calendrier)
-    if(!selectedStart || !selectedEnd) {
-        alert("⚠️ Veuillez sélectionner vos dates sur le calendrier.");
-        return;
-    }
-
-    // 2. Vérification des documents obligatoires
-    const idCard = document.getElementById('fileIdCard').files.length > 0;
-    const license = document.getElementById('fileLicense').files.length > 0;
-    const proof = document.getElementById('fileProof').files.length > 0;
-    
-    if(!idCard || !license || !proof) {
-        alert("⛔ Documents manquants ! Merci de joindre l'Identité, le Permis et un Justificatif.");
-        return;
-    }
-
-    // 3. Récupération des données du formulaire
-    const data = {
-        nom: document.getElementById('lastname').value.toUpperCase(),
-        prenom: document.getElementById('firstname').value,
-        email: document.getElementById('email').value,
-        tel: document.getElementById('phone').value,
-        debut: selectedStart + " à " + (selectedStartTime || "--:--"),
-        fin: selectedEnd + " à " + (selectedEndTime || "--:--"),
-        option: document.getElementById('mileageSelect').value === 'unlimited' ? 'ILLIMITÉ' : 'STANDARD',
-        prix: document.getElementById('displayPrice').innerText,
-        message: document.getElementById('message').value
-    };
-
-    // 4. Construction du message WhatsApp pour toi
-    const text = `*NOUVELLE DEMANDE PERFECT DRIVE* 🏎️%0A%0A` +
-                 `👤 *Client:* ${data.prenom} ${data.nom}%0A` +
-                 `📅 *Du:* ${data.debut}%0A` +
-                 `📅 *Au:* ${data.fin}%0A` +
-                 `💰 *Tarif:* ${data.prix} (${data.option})%0A` +
-                 `📞 *Tel:* ${data.tel}%0A` +
-                 `✉️ *Email:* ${data.email}%0A` +
-                 `💬 *Note:* ${data.message || 'Aucune'}%0A%0A` +
-                 `📸 *Docs:* Envoyés sur le site.%0A%0A` +
-                 `✅ *Accepter:* (Lien automatique bientôt disponible)%0A` +
-                 `❌ *Refuser:* (Lien automatique bientôt disponible)`;
-
-    // 5. Envoi vers TON WhatsApp (0614739169)
-    // On met le format international 33 sans le 0
-    const monNumero = "33614739169"; 
-    window.open(`https://wa.me/${monNumero}?text=${text}`, '_blank');
-
-    // 6. Feedback visuel sur le bouton
-    const btn = document.getElementById('submitBtn');
-    btn.textContent = "TRANSFERT WHATSAPP..."; 
-    btn.style.backgroundColor = "#22c55e"; 
-    btn.style.color = "white";
-}
+            e.preventDefault(); 
+            
+            if(!selectedStart || !selectedEnd) {
+                const alertBox = document.getElementById('alertBox');
+                alertBox.innerText = "⚠️ Veuillez sélectionner vos dates sur le calendrier.";
+                alertBox.classList.remove('hidden');
+                document.getElementById('booking').scrollIntoView();
+                return;
+            }
 
             // --- VÉRIFICATION STRICTE DES DOCUMENTS ---
             const idCard = document.getElementById('fileIdCard').files.length > 0;
@@ -501,4 +455,3 @@
     </script>
 </body>
 </html>
-
