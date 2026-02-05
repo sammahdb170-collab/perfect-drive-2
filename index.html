@@ -395,83 +395,62 @@
             } 
         }
 
-        function handleBooking(e) {
+        async function handleBooking(e) {
             e.preventDefault(); 
             
-            // 1. Vérification Dates
             if(!selectedStart || !selectedEnd) {
                 alert("⚠️ Veuillez sélectionner vos dates sur le calendrier.");
                 return;
             }
 
-            // 2. Vérification des Documents (Indispensable pour tes tests)
-            const fileId = document.getElementById('fileIdCard').files[0];
-            const fileLic = document.getElementById('fileLicense').files[0];
-            const filePrf = document.getElementById('fileProof').files[0];
-            
-            let missingDocs = false;
-            if(!fileId) { document.getElementById('labelIdCard').classList.add('border-error'); missingDocs = true; }
-            if(!fileLic) { document.getElementById('labelLicense').classList.add('border-error'); missingDocs = true; }
-            if(!filePrf) { document.getElementById('labelProof').classList.add('border-error'); missingDocs = true; }
-            
-            if(missingDocs) {
-                alert("⛔ Documents manquants !\n\nMerci de joindre votre ID, Permis et Justificatif.");
-                return;
-            }
-
-            // 3. Récupération des infos
-            const data = {
-                nom: document.getElementById('lastname').value.toUpperCase(),
-                prenom: document.getElementById('firstname').value,
-                tel: document.getElementById('phone').value,
-                prix: document.getElementById('displayPrice').innerText,
-                option: document.getElementById('mileageSelect').value === 'unlimited' ? 'ILLIMITÉ' : 'STANDARD',
-                debut: selectedStart + " à " + document.getElementById('timeStart').value,
-                fin: selectedEnd + " à " + document.getElementById('timeEnd').value,
-                // On récupère les noms des fichiers pour le message
-                docId: fileId.name,
-                docLic: fileLic.name,
-                docPrf: filePrf.name
-            };
-
-            // 4. Construction du message WhatsApp (avec les noms des documents joints)
-            const text = `*NOUVELLE DEMANDE PERFECT DRIVE* 🏎️%0A%0A` +
-                         `👤 *Client:* ${data.prenom} ${data.nom}%0A` +
-                         `📅 *Du:* ${data.debut}%0A` +
-                         `📅 *Au:* ${data.fin}%0A` +
-                         `💰 *TOTAL:* ${data.prix} (${data.option})%0A` +
-                         `📞 *Tél:* ${data.tel}%0A%0A` +
-                         `📂 *DOCUMENTS JOINTS :*%0A` +
-                         `✅ ID : ${data.docId}%0A` +
-                         `✅ Permis : ${data.docLic}%0A` +
-                         `✅ Domicile : ${data.docPrf}%0A%0A` +
-                         `----------------------------%0A` +
-                         `✅ _Accepter la demande_%0A` +
-                         `❌ _Refuser la demande_`;
-
-            // 5. Envoi vers WhatsApp (0614739169)
-            window.open(`https://wa.me/33614739169?text=${text}`, '_blank');
-
-            // 6. Ton animation de succès originale (On ne change rien au visuel)
             const btn = document.getElementById('submitBtn');
-            btn.textContent = "DEMANDE ENVOYÉE !"; 
-            btn.style.backgroundColor = "#22c55e"; 
-            btn.style.color = "white";
+            const originalText = btn.textContent;
             
-            setTimeout(() => { 
-                btn.textContent = "CONFIRMER MA DEMANDE"; 
-                btn.style.backgroundColor = "white"; 
-                btn.style.color = "black"; 
-                e.target.reset();
-                // Reset visuel des labels
-                ['labelIdCard', 'labelLicense', 'labelProof'].forEach(id => {
-                    document.getElementById(id).classList.remove('border-green-500', 'bg-green-500/10', 'border-error');
+            // État de chargement
+            btn.disabled = true;
+            btn.textContent = "ENVOI EN COURS...";
+            btn.style.backgroundColor = "#0051ff";
+
+            // Préparation des données et des fichiers
+            const formData = new FormData();
+            formData.append('prenom', document.getElementById('firstname').value);
+            formData.append('nom', document.getElementById('lastname').value);
+            formData.append('tel', document.getElementById('phone').value);
+            formData.append('prix', document.getElementById('displayPrice').innerText);
+            formData.append('debut', selectedStart + " à " + document.getElementById('timeStart').value);
+            formData.append('fin', selectedEnd + " à " + document.getElementById('timeEnd').value);
+            
+            // On ajoute les fichiers
+            formData.append('photo_identite', document.getElementById('fileIdCard').files[0]);
+            formData.append('photo_permis', document.getElementById('fileLicense').files[0]);
+            formData.append('photo_domicile', document.getElementById('fileProof').files[0]);
+
+            try {
+                const response = await fetch('https://hook.eu1.make.com/7xza5kjfbpl6eq78r0ldvja52bwk8816', {
+                    method: 'POST',
+                    body: formData
                 });
-            }, 3000);
+
+                if (response.ok) {
+                    btn.style.backgroundColor = "#22c55e";
+                    btn.textContent = "DEMANDE ENVOYÉE !";
+                    alert("✅ Demande transmise ! Vous allez être recontacté.");
+                    e.target.reset();
+                    // Reset du calendrier et prix ici si besoin
+                } else {
+                    throw new Error();
+                }
+            } catch (error) {
+                alert("❌ Erreur lors de l'envoi.");
+                btn.disabled = false;
+                btn.textContent = originalText;
+                btn.style.backgroundColor = "white";
+            }
         }
         window.onload = init;
     </script>
 </body>
 </html>
+
 
 
