@@ -398,26 +398,61 @@
         function handleBooking(e) {
             e.preventDefault(); 
             
+            // 1. Vérification Dates
             if(!selectedStart || !selectedEnd) {
-                alert("⚠️ Sélectionne tes dates sur le calendrier !");
+                alert("⚠️ Veuillez sélectionner vos dates sur le calendrier.");
                 return;
             }
 
-            // Récupération des infos pour le message
-            const nom = document.getElementById('lastname').value.toUpperCase();
-            const prenom = document.getElementById('firstname').value;
-            const tel = document.getElementById('phone').value;
-            const prix = document.getElementById('displayPrice').innerText;
-            const debut = selectedStart + " à " + document.getElementById('timeStart').value;
-            const fin = selectedEnd + " à " + document.getElementById('timeEnd').value;
+            // 2. Vérification des Documents (Indispensable pour tes tests)
+            const fileId = document.getElementById('fileIdCard').files[0];
+            const fileLic = document.getElementById('fileLicense').files[0];
+            const filePrf = document.getElementById('fileProof').files[0];
+            
+            let missingDocs = false;
+            if(!fileId) { document.getElementById('labelIdCard').classList.add('border-error'); missingDocs = true; }
+            if(!fileLic) { document.getElementById('labelLicense').classList.add('border-error'); missingDocs = true; }
+            if(!filePrf) { document.getElementById('labelProof').classList.add('border-error'); missingDocs = true; }
+            
+            if(missingDocs) {
+                alert("⛔ Documents manquants !\n\nMerci de joindre votre ID, Permis et Justificatif.");
+                return;
+            }
 
-            // Construction du message pour ton WhatsApp
-            const text = `*NOUVELLE RÉSERVATION* 🏎️%0A%0A👤 *Client:* ${prenom} ${nom}%0A📅 *Du:* ${debut}%0A📅 *Au:* ${fin}%0A💰 *TOTAL:* ${prix}%0A📞 *Tél:* ${tel}%0A%0A✅ Accepter / ❌ Refuser`;
+            // 3. Récupération des infos
+            const data = {
+                nom: document.getElementById('lastname').value.toUpperCase(),
+                prenom: document.getElementById('firstname').value,
+                tel: document.getElementById('phone').value,
+                prix: document.getElementById('displayPrice').innerText,
+                option: document.getElementById('mileageSelect').value === 'unlimited' ? 'ILLIMITÉ' : 'STANDARD',
+                debut: selectedStart + " à " + document.getElementById('timeStart').value,
+                fin: selectedEnd + " à " + document.getElementById('timeEnd').value,
+                // On récupère les noms des fichiers pour le message
+                docId: fileId.name,
+                docLic: fileLic.name,
+                docPrf: filePrf.name
+            };
 
-            // Ouverture de WhatsApp
+            // 4. Construction du message WhatsApp (avec les noms des documents joints)
+            const text = `*NOUVELLE DEMANDE PERFECT DRIVE* 🏎️%0A%0A` +
+                         `👤 *Client:* ${data.prenom} ${data.nom}%0A` +
+                         `📅 *Du:* ${data.debut}%0A` +
+                         `📅 *Au:* ${data.fin}%0A` +
+                         `💰 *TOTAL:* ${data.prix} (${data.option})%0A` +
+                         `📞 *Tél:* ${data.tel}%0A%0A` +
+                         `📂 *DOCUMENTS JOINTS :*%0A` +
+                         `✅ ID : ${data.docId}%0A` +
+                         `✅ Permis : ${data.docLic}%0A` +
+                         `✅ Domicile : ${data.docPrf}%0A%0A` +
+                         `----------------------------%0A` +
+                         `✅ _Accepter la demande_%0A` +
+                         `❌ _Refuser la demande_`;
+
+            // 5. Envoi vers WhatsApp (0614739169)
             window.open(`https://wa.me/33614739169?text=${text}`, '_blank');
 
-            // Ton animation de succès originale
+            // 6. Ton animation de succès originale (On ne change rien au visuel)
             const btn = document.getElementById('submitBtn');
             btn.textContent = "DEMANDE ENVOYÉE !"; 
             btn.style.backgroundColor = "#22c55e"; 
@@ -427,11 +462,16 @@
                 btn.textContent = "CONFIRMER MA DEMANDE"; 
                 btn.style.backgroundColor = "white"; 
                 btn.style.color = "black"; 
+                e.target.reset();
+                // Reset visuel des labels
+                ['labelIdCard', 'labelLicense', 'labelProof'].forEach(id => {
+                    document.getElementById(id).classList.remove('border-green-500', 'bg-green-500/10', 'border-error');
+                });
             }, 3000);
         }
-
         window.onload = init;
     </script>
 </body>
 </html>
+
 
