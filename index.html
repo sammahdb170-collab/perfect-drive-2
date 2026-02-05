@@ -399,29 +399,25 @@
             e.preventDefault(); 
             
             if(!selectedStart || !selectedEnd) {
-                alert("⚠️ Veuillez sélectionner vos dates sur le calendrier.");
+                alert("⚠️ Veuillez sélectionner vos dates.");
                 return;
             }
 
             const btn = document.getElementById('submitBtn');
-            const originalText = btn.textContent;
-            
-            // État de chargement
             btn.disabled = true;
             btn.textContent = "ENVOI EN COURS...";
-            btn.style.backgroundColor = "#0051ff";
 
-            // Préparation des données et des fichiers
             const formData = new FormData();
             formData.append('prenom', document.getElementById('firstname').value);
             formData.append('nom', document.getElementById('lastname').value);
             formData.append('tel', document.getElementById('phone').value);
+            formData.append('email', document.getElementById('email').value);
             formData.append('prix', document.getElementById('displayPrice').innerText);
-            formData.append('debut', selectedStart + " à " + document.getElementById('timeStart').value);
-            formData.append('fin', selectedEnd + " à " + document.getElementById('timeEnd').value);
+            formData.append('debut', selectedStart + " " + (selectedStartTime || "09:00"));
+            formData.append('fin', selectedEnd + " " + (selectedEndTime || "09:00"));
             
-            // On ajoute les fichiers
-            formData.append('photo_identite', document.getElementById('fileIdCard').files[0]);
+            // Les fichiers
+            formData.append('photo_id', document.getElementById('fileIdCard').files[0]);
             formData.append('photo_permis', document.getElementById('fileLicense').files[0]);
             formData.append('photo_domicile', document.getElementById('fileProof').files[0]);
 
@@ -434,23 +430,20 @@
                 if (response.ok) {
                     btn.style.backgroundColor = "#22c55e";
                     btn.textContent = "DEMANDE ENVOYÉE !";
-                    alert("✅ Demande transmise ! Vous allez être recontacté.");
+                    alert("✅ Demande reçue ! On vous recontacte vite.");
                     e.target.reset();
-                    // Reset du calendrier et prix ici si besoin
-                } else {
-                    throw new Error();
                 }
             } catch (error) {
-                alert("❌ Erreur lors de l'envoi.");
+                alert("❌ Erreur d'envoi");
                 btn.disabled = false;
-                btn.textContent = originalText;
-                btn.style.backgroundColor = "white";
+                btn.textContent = "CONFIRMER MA DEMANDE";
             }
         }
         window.onload = init;
     </script>
 </body>
 </html>
+
 
 
 
